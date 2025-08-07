@@ -1,0 +1,451 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+}
+
+.sidebar {
+  width: 220px;
+  background-color: #2c3e50;
+  color: white;
+  height: 100vh;
+  padding: 20px;
+  position: fixed;
+}
+
+.sidebar h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar li {
+  margin: 10px 0;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 4px;
+  transition: 0.2s;
+}
+
+.sidebar li:hover {
+  background-color: #34495e;
+}
+
+.main {
+  margin-left: 240px;
+  padding: 20px;
+  flex: 1;
+  background: #ecf0f1;
+  min-height: 100vh;
+}
+
+input, button {
+  display: block;
+  margin: 10px 0;
+  padding: 8px;
+  width: 100%;
+  max-width: 400px;
+}
+
+button {
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #3498db;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: white;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+.main {
+  margin-left: 240px;
+  padding: 40px 40px 20px 40px;
+}
+
+nav button, .sidebar li {
+  transition: background-color 0.3s ease;
+}
+
+.sidebar li.logout {
+  background-color: #c0392b !important;
+  color: white;
+}
+
+.sidebar li.logout:hover {
+  background-color: #e74c3c !important;
+}
+
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px;
+  background: white;
+  border-radius: 4px;
+}
+
+.user-item div:first-child {
+  flex: 1;
+}
+
+.user-item button {
+  width: auto;
+  padding: 5px 10px;
+  margin-left: 5px;
+}
+
+.user-item button:first-of-type {
+  background-color: #f39c12;
+}
+
+.user-item button:first-of-type:hover {
+  background-color: #e67e22;
+}
+
+.user-item button:last-of-type {
+  background-color: #e74c3c;
+}
+
+.user-item button:last-of-type:hover {
+  background-color: #c0392b;
+}
+
+#usersList {
+  margin-bottom: 20px;
+}
+
+#changePasswordSection input {
+  margin-bottom: 10px;
+}
+
+#welcomeBox {
+  text-align: center;
+}
+
+#welcomeBox button {
+  margin: 20px auto;
+}
+
+.form-group {
+  background: white;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.form-group h3 {
+  margin-top: 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+#ipcMenu {
+  display: none;
+}
+
+#userDisplay {
+  color: white;
+  word-break: break-word;
+  font-size: 14px;
+  margin: 20px 10px 0;
+  padding: 10px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+
+#userDisplay::before {
+  content: "Logged in as:";
+  display: block;
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 5px;
+}
+
+#settingsMenu {
+  display: none;
+}
+
+#userDisplay {
+  display: none;
+  padding: 10px;
+  margin: 20px 10px 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: white;
+}
+
+#passwordChangeMessage {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.button-group button {
+  flex: 1;
+}
+
+#userInfoSection p {
+  margin: 10px 0;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+/* Settings Page Styles */
+.info-table {
+  width: 100%;
+  margin-bottom: 20px;
+  background: white;
+}
+
+.info-table td {
+  padding: 10px;
+  border: none;
+  text-align: left;
+}
+
+.info-table td:first-child {
+  width: 150px;
+  font-weight: bold;
+}
+
+.info-table input {
+  width: 100%;
+  margin: 0;
+}
+
+.users-table {
+  width: 100%;
+  margin-bottom: 20px;
+  background: white;
+}
+
+.users-table th {
+  background: #2c3e50;
+  color: white;
+  text-align: left;
+}
+
+.users-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.users-table .actions {
+  display: flex;
+  gap: 5px;
+}
+
+.users-table .actions button {
+  width: auto;
+  padding: 5px 10px;
+  margin: 0;
+}
+
+.delete-btn {
+  background-color: #e74c3c !important;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b !important;
+}
+
+#adminInfo table input {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#regularUserInfo p {
+  margin: 15px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+
+
+/* IPC Entry Section Enhancements */
+.form-group {
+  background: white;
+  padding: 20px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  max-width: 500px;
+}
+
+.form-group label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.form-group input {
+  width: calc(100% - 12px);
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.form-group .button-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.form-group .button-row button {
+  width: auto;
+  padding: 8px 16px;
+}
+
+/* IPC Table Action Buttons */
+.ipc-action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.ipc-action-buttons button {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+}
+
+.ipc-action-buttons .edit-btn {
+  background-color: #f39c12;
+  color: white;
+}
+
+.ipc-action-buttons .edit-btn:hover {
+  background-color: #e67e22;
+}
+
+.ipc-action-buttons .delete-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.ipc-action-buttons .delete-btn:hover {
+  background-color: #c0392b;
+}
+
+
+
+/* Final UI polish for IPC form layout */
+#ipcSection h2 {
+  margin-bottom: 20px;
+}
+
+#poInput, #site, #idNo, #vendor, #value {
+  margin-bottom: 10px;
+  max-width: 300px;
+}
+
+#poDetails input,
+#ipcSection input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#poDetails button,
+#ipcSection button {
+  width: auto;
+  padding: 8px 16px;
+  margin-right: 10px;
+}
+
+#poDetails {
+  margin-top: 15px;
+}
+
+#ipcSection .form-group {
+  background: #fff;
+  border-radius: 8px;
+  padding: 25px;
+  max-width: 450px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#ipcSection .form-group label {
+  font-weight: 600;
+  font-style: italic;
+  display: block;
+  margin-bottom: 5px;
+}
+
+#ipcSection .form-group input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+#ipcSection .button-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+
+.ipc-flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.ipc-left-column {
+  flex: 1;
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.ipc-right-column {
+  flex: 2;
+  min-width: 400px;
+}
+
+
+
+/* Align top content in flex layout */
+.ipc-flex-container {
+  align-items: flex-start;
+}
+
+/* Align titles at the same level */
+.ipc-left-column h2,
+.ipc-right-column h3 {
+  margin-top: 0;
+}
+
+.ipc-right-column {
+  padding-top: 32px; /* aligns h3 with h2 visually */
+}

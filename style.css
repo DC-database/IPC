@@ -1,451 +1,543 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  display: flex;
+
+/* Base and existing styles trimmed for brevity; mobile-friendly layout */
+body { margin:0; font-family: Arial, sans-serif; display:flex; }
+.sidebar { width:220px; background:#2c3e50; color:#fff; height:100vh; padding:20px; position:fixed; z-index:1000; transition:transform .25s ease; }
+.main { margin-left:240px; padding:40px; flex:1; background:#ecf0f1; min-height:100vh; }
+.topbar { position:fixed; top:0; left:0; height:56px; width:100%; background:#2c3e50; color:#fff; display:flex; align-items:center; gap:12px; padding:0 12px 0 60px; z-index:900; }
+.hamburger { position:fixed; top:10px; left:14px; background:transparent; border:none; color:#fff; font-size:22px; cursor:pointer; z-index:1001; }
+.main { margin-top:56px; }
+#overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; z-index:800; }
+.close-sidebar { display:none; background:transparent; color:#fff; border:none; font-size:20px; position:absolute; top:10px; right:10px; cursor:pointer; }
+
+/* IPC entry layout */
+.ipc-flex-container { display:flex; flex-wrap:wrap; gap:30px; align-items:flex-start; }
+.ipc-left-column { flex:1; min-width:300px; max-width:400px; }
+.ipc-right-column { flex:2; min-width:400px; }
+#ipcSection .form-group { background:#fff; border-radius:8px; padding:25px; max-width:450px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+input, button { display:block; margin:10px 0; padding:10px; width:100%; max-width:400px; }
+button { background:#2980b9; color:#fff; border:none; cursor:pointer; }
+button:hover { background:#3498db; }
+
+/* PO info card */
+.poinfo-card { background:#fff; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,.08); overflow:hidden; }
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#f7f8fa; cursor:pointer; user-select:none; }
+.toggle-label { font-weight:600; font-size:15px; color:#2c3e50; }
+.toggle-icon { font-size:20px; width:22px; text-align:center; color:#2c3e50; }
+.toggle-content { padding:12px 14px; background:#fff; transition:max-height .25s ease, opacity .2s ease; overflow:hidden; max-height:999px; opacity:1; }
+
+/* Active IPC page */
+.table-responsive { overflow-x:auto; background:#fff; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+.active-po-table { width:100%; border-collapse:collapse; }
+.active-po-table th, .active-po-table td { padding:12px; border-bottom:1px solid #eee; text-align:left; }
+.active-po-table th { background:#f7f8fa; font-weight:600; }
+.mini-toggle { width:28px; height:28px; border-radius:6px; border:none; background:#ecf0f1; cursor:pointer; font-size:16px; }
+.mini-toggle:hover { background:#e2e6ea; }
+.details-row td { background:#fafbfc; padding:0; }
+.entries-wrap { padding:14px; }
+.entries-title { font-weight:600; margin-bottom:8px; }
+.entries-table-container { overflow-x:auto; }
+.inner-table { width:100%; border-collapse:collapse; background:#fff; border-radius:6px; }
+.inner-table th, .inner-table td { padding:10px; border-bottom:1px solid #f0f0f0; text-align:left; }
+.inner-table th { background:#f9fafb; }
+
+.form-group { background:#fff; padding:15px; border-radius:8px; margin-bottom:20px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sidebar { transform:translateX(-100%); width:260px; }
+  .sidebar.open { transform:translateX(0); }
+  #overlay.show { display:block; }
+  .close-sidebar { display:block; }
+  .main { margin-left:0 !important; padding:16px; }
+  .ipc-flex-container { flex-direction:column; }
+  .ipc-left-column, .ipc-right-column { min-width:100%; max-width:100%; }
+  input, button { max-width:100%; }
 }
 
-.sidebar {
-  width: 220px;
-  background-color: #2c3e50;
-  color: white;
-  height: 100vh;
-  padding: 20px;
-  position: fixed;
-}
 
-.sidebar h2 {
-  font-size: 20px;
-  margin-bottom: 20px;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.sidebar li {
-  margin: 10px 0;
+/* Sidebar hover cursor and highlight */
+.sidebar ul { list-style: none; padding: 0; margin: 16px 0; }
+.sidebar ul li {
+  padding: 10px 12px;
+  border-radius: 8px;
   cursor: pointer;
-  padding: 10px;
-  border-radius: 4px;
-  transition: 0.2s;
+  user-select: none;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.sidebar ul li:hover {
+  background: #34495e;
+}
+.sidebar ul li.active {
+  background: #1f2d3a;
+  box-shadow: inset 3px 0 0 #1abc9c;
 }
 
-.sidebar li:hover {
-  background-color: #34495e;
+
+/* Stronger sidebar pointer + hover highlight */
+.sidebar ul { list-style:none; padding:0; margin:16px 0; }
+.sidebar ul li, .sidebar ul li * { cursor: pointer; }
+.sidebar ul li {
+  padding: 10px 12px;
+  border-radius: 8px;
+  user-select: none;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.sidebar ul li:hover {
+  background: #2f4253;
+  color: #ffffff;
+}
+.sidebar ul li.active {
+  background: #1f2d3a;
+  color: #ffffff;
+  box-shadow: inset 3px 0 0 #1abc9c;
 }
 
-.main {
-  margin-left: 240px;
-  padding: 20px;
-  flex: 1;
-  background: #ecf0f1;
-  min-height: 100vh;
-}
+.po-input { width: 250px; }
 
-input, button {
-  display: block;
-  margin: 10px 0;
-  padding: 8px;
-  width: 100%;
-  max-width: 400px;
-}
 
-button {
-  background-color: #2980b9;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
+/* ===== Improved IPC Entries table look ===== */
+#ipcSection .ipc-entries-title { margin-top: 20px; margin-bottom: 10px; font-weight: 700; }
 
-button:hover {
-  background-color: #3498db;
-}
-
-table {
+#ipcSection table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
-  background-color: white;
+  background: #fff;
+  border: 1px solid #dfe4ea;         /* outer border */
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  margin-top: 8px;
 }
 
-th, td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: center;
+#ipcSection thead th {
+  background: #f1f5f9;               /* clearer header */
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.main {
-  margin-left: 240px;
-  padding: 40px 40px 20px 40px;
+#ipcSection th, #ipcSection td {
+  padding: 10px 12px;
+  border-right: 1px solid #eef2f7;    /* vertical lines */
+  text-align: left;
 }
 
-nav button, .sidebar li {
-  transition: background-color 0.3s ease;
+#ipcSection th:last-child, #ipcSection td:last-child { border-right: none; }
+
+#ipcSection tbody tr { border-bottom: 1px solid #eef2f7; }
+#ipcSection tbody tr:nth-child(odd) { background: #fafbfc; }  /* zebra rows */
+
+#ipcSection tbody td:not(:first-child) { text-align: right; } /* numbers align right */
+#ipcSection tbody td:last-child { text-align: center; }       /* Actions center */
+
+
+/* === Global table header theme: white text on theme blue === */
+table thead th {
+  background-color: #2c3e50; /* sidebar/theme blue */
+  color: #fff;
+}
+#ipcSection thead th {
+  background-color: #2c3e50;
+  color: #fff;
 }
 
-.sidebar li.logout {
-  background-color: #c0392b !important;
-  color: white;
+
+/* === View Active IPC table header theme === */
+#activeIPCSection thead th {
+  background-color: #2c3e50;
+  color: #fff;
 }
 
-.sidebar li.logout:hover {
-  background-color: #e74c3c !important;
+
+/* === View Active IPC table header themes === */
+#activeIPCSection .po-table thead th {
+  background-color: #2c3e50;
+  color: #fff;
+}
+#activeIPCSection .ipc-table thead th {
+  background-color: #4f6f8f; /* lighter blue */
+  color: #fff;
 }
 
-.user-item {
-  display: flex;
-  justify-content: space-between;
+
+/* === Lighter blue for IPC sub-table headers in View Active IPC === */
+#activeIPCSection .ipc-sub-table thead th {
+  background-color: #4f6f8f; /* lighter blue */
+  color: #fff;
+}
+
+
+/* Lighter blue header for IPC sub-tables in View Active IPC */
+#activeIPCSection .ipc-sub-table thead th {
+  background-color: #4f6f8f; /* lighter blue */
+  color: #fff;
+}
+
+
+/* Retention quick calculator layout */
+.retention-calc {
+  display: grid;
+  grid-template-columns: auto 100px auto 160px;
+  gap: 6px 10px;
   align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 10px;
-  background: white;
-  border-radius: 4px;
+  margin: 6px 0 10px;
+}
+.retention-calc .mini { font-size: 12px; color: #6b7280; }
+#retention.computed {
+  background: #f5faff;   /* hint that it's auto-filled */
 }
 
-.user-item div:first-child {
-  flex: 1;
+
+/* --- FIX: tighter Ret.% and Base alignment next to their inputs --- */
+.retention-calc {
+  display: grid;
+  grid-template-columns: max-content 120px max-content 160px; /* label + input, label + input */
+  column-gap: 6px; /* small gap so labels hug inputs */
+  row-gap: 6px;
+  align-items: center;
+  margin: 6px 0 10px;
+}
+.retention-calc label.mini { margin-right: 2px; }
+.retention-calc input { width: 100%; max-width: none; } /* prevent global max-width from pushing layout */
+
+
+
+/* --- FIX: Ret.% and Base stacked neatly above inputs --- */
+.retention-calc {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* two equal-width columns */
+  gap: 6px 12px;
+  align-items: start;
+  margin: 6px 0 10px;
 }
 
-.user-item button {
-  width: auto;
-  padding: 5px 10px;
-  margin-left: 5px;
-}
-
-.user-item button:first-of-type {
-  background-color: #f39c12;
-}
-
-.user-item button:first-of-type:hover {
-  background-color: #e67e22;
-}
-
-.user-item button:last-of-type {
-  background-color: #e74c3c;
-}
-
-.user-item button:last-of-type:hover {
-  background-color: #c0392b;
-}
-
-#usersList {
-  margin-bottom: 20px;
-}
-
-#changePasswordSection input {
-  margin-bottom: 10px;
-}
-
-#welcomeBox {
-  text-align: center;
-}
-
-#welcomeBox button {
-  margin: 20px auto;
-}
-
-.form-group {
-  background: white;
-  padding: 15px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-}
-
-.form-group h3 {
-  margin-top: 0;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-}
-
-#ipcMenu {
-  display: none;
-}
-
-#userDisplay {
-  color: white;
-  word-break: break-word;
-  font-size: 14px;
-  margin: 20px 10px 0;
-  padding: 10px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 4px;
-}
-
-#userDisplay::before {
-  content: "Logged in as:";
-  display: block;
+.retention-calc label.mini {
   font-size: 12px;
-  opacity: 0.7;
-  margin-bottom: 5px;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 2px;
 }
 
-#settingsMenu {
-  display: none;
+.retention-calc input {
+  width: 100%;
+  max-width: none;
 }
 
-#userDisplay {
-  display: none;
-  padding: 10px;
-  margin: 20px 10px 0;
-  background: rgba(255,255,255,0.1);
-  border-radius: 4px;
-  color: white;
+
+
+/* --- FIX 2: make Ret.% and Base on one line exactly like screenshot --- */
+.retention-calc {
+  display: flex;
+  align-items: center;
+  gap: 14px;                 /* space between the two input groups */
+  margin: 6px 0 10px;
+  flex-wrap: wrap;           /* avoid overflow on small screens */
+}
+.retention-calc label.mini {
+  margin-right: 6px;         /* label hugs its input */
+  white-space: nowrap;
+  font-size: 12px;
+}
+/* Specific widths to mirror screenshot */
+#retentionPercent {
+  width: 200px;
+  max-width: 200px;
+}
+#retentionBase {
+  width: 260px;
+  max-width: 260px;
+}
+/* Prevent global input max-width from interfering */
+.retention-calc input {
+  max-width: none !important;
 }
 
-#passwordChangeMessage {
-  margin-top: 10px;
-  padding: 8px;
-  border-radius: 4px;
-  text-align: center;
+
+
+/* --- FIX 3 (finalize): widen card + keep Ret.% and Base on the same line --- */
+#ipcEntrySection .form-group {
+  max-width: 640px; /* allow two inputs to fit on one row */
 }
 
-.button-group {
+.retention-calc {
+  display: grid;
+  grid-template-columns: max-content 140px max-content 200px; /* Ret.% + input | Base + input */
+  column-gap: 16px;
+  row-gap: 8px;
+  align-items: center;
+  margin: 6px 0 10px;
+}
+
+.retention-calc label.mini {
+  margin-right: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.retention-calc input {
+  max-width: none !important; /* override global input max-width */
+}
+
+#retentionPercent { width: 140px !important; }
+#retentionBase { width: 200px !important; }
+
+
+
+/* --- FINAL FIX: center-align Ret.% and Base with their inputs --- */
+.retention-calc {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* space between the two groups */
+  margin: 6px 0 10px;
+}
+
+.retention-calc .mini {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
+  font-size: 12px;
+  line-height: 1; /* remove extra vertical space */
+  white-space: nowrap;
+}
+
+#retentionPercent {
+  width: 140px !important;
+}
+
+#retentionBase {
+  width: 200px !important;
+}
+
+.retention-calc input {
+  max-width: none !important;
+}
+
+
+
+/* Arrange Ret.% and Base vertically */
+.retention-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.retention-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.retention-row .mini {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+.retention-row input {
+  max-width: 160px;
+}
+
+
+/* === OVERRIDE: Stack Base BELOW Ret.% (two rows) === */
+.ipc-right-column .retention-calc {
+  display: grid !important;
+  grid-template-columns: max-content 220px;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 8px;
+  align-items: center;
+  margin: 6px 0 10px;
+}
+.ipc-right-column .retention-calc label[for="retentionPercent"] { grid-column: 1; grid-row: 1; }
+.ipc-right-column #retentionPercent { grid-column: 2; grid-row: 1; }
+.ipc-right-column .retention-calc label[for="retentionBase"] { grid-column: 1; grid-row: 2; }
+.ipc-right-column #retentionBase { grid-column: 2; grid-row: 2; }
+
+/* Optional fixed widths for a clean look */
+.ipc-right-column #retentionPercent { width: 140px; max-width: 140px; }
+.ipc-right-column #retentionBase { width: 220px; max-width: 220px; }
+
+
+
+/* === OVERRIDE: Narrow Add IPC Entry card === */
+.add-ipc-card {
+  max-width: 500px !important; /* matches form input width */
+  margin: 0 auto !important;   /* center horizontally */
+}
+
+
+
+/* === OVERRIDE: Proportional Add IPC Entry Card === */
+.add-ipc-card {
+  display: inline-block !important;
+  padding: 20px;
+  margin: 0 auto !important;
+  min-width: 400px;
+  max-width: 90%;
+  box-sizing: border-box;
+}
+
+/* Side-by-side Add IPC and Clear buttons */
+.add-ipc-card .button-row {
   display: flex;
   gap: 10px;
 }
-
-.button-group button {
+.add-ipc-card .button-row button {
   flex: 1;
 }
 
-#userInfoSection p {
-  margin: 10px 0;
-  padding: 8px;
-  background: #f8f9fa;
+
+
+/* === OVERRIDE: Remove card styling from IPC Entry form === */
+.ipc-right-column .form-group {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  max-width: 560px;      /* keep a comfortable readable width */
+  margin: 0 !important;
+}
+
+/* Keep inputs and buttons proportionate to content */
+.ipc-right-column input,
+.ipc-right-column button {
+  max-width: 560px;
+}
+
+/* Side-by-side buttons for better desktop layout */
+.ipc-right-column .button-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+.ipc-right-column .button-row button {
+  flex: 1;
+  max-width: none;
+}
+
+
+
+/* === OVERRIDE: Remove card styling from View Active IPC page === */
+#viewActiveIPC .card,
+.view-active-ipc .card {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+#viewActiveIPC .card-body,
+.view-active-ipc .card-body {
+  padding: 0 !important;
+}
+
+
+
+/* === OVERRIDE: Remove card styling in View Active IPC page === */
+#activeIPCSection .form-group {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+#activeIPCSection .table-responsive {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Inner tables: remove white card feel */
+#activeIPCSection .inner-table {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Keep header theme intact */
+#activeIPCSection thead th {
+  background-color: #2c3e50 !important;
+  color: #fff !important;
+}
+
+
+
+/* === OVERRIDE: Uniform + / - icons in View Active IPC table === */
+#activeIPCSection .toggle-row button,
+#activeIPCSection .toggle-row .toggle-icon {
+  background-color: #2c3e50 !important; /* dark blue */
+  color: #ffffff !important;            /* white font */
+  border: none !important;
+  padding: 4px 8px;
   border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-/* Settings Page Styles */
-.info-table {
-  width: 100%;
-  margin-bottom: 20px;
-  background: white;
+/* Ensure +/- text color is white */
+#activeIPCSection .toggle-row button:hover,
+#activeIPCSection .toggle-row .toggle-icon:hover {
+  background-color: #1a252f !important; /* darker on hover */
+  color: #ffffff !important;
 }
 
-.info-table td {
-  padding: 10px;
+/* === OVERRIDE: Remove card styling from PO Information === */
+#poInfoWrap {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+
+
+/* Dark theme for +/- buttons in View Active IPC table */
+.view-active-ipc-table button.toggle-ipc {
+  background-color: #003366; /* dark blue */
+  color: #ffffff;
   border: none;
-  text-align: left;
-}
-
-.info-table td:first-child {
-  width: 150px;
-  font-weight: bold;
-}
-
-.info-table input {
-  width: 100%;
-  margin: 0;
-}
-
-.users-table {
-  width: 100%;
-  margin-bottom: 20px;
-  background: white;
-}
-
-.users-table th {
-  background: #2c3e50;
-  color: white;
-  text-align: left;
-}
-
-.users-table td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.users-table .actions {
-  display: flex;
-  gap: 5px;
-}
-
-.users-table .actions button {
-  width: auto;
-  padding: 5px 10px;
-  margin: 0;
-}
-
-.delete-btn {
-  background-color: #e74c3c !important;
-}
-
-.delete-btn:hover {
-  background-color: #c0392b !important;
-}
-
-#adminInfo table input {
-  background: #f8f9fa;
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#regularUserInfo p {
-  margin: 15px 0;
-  padding: 10px;
-  background: #f8f9fa;
-  border-radius: 4px;
-}
-
-
-
-/* IPC Entry Section Enhancements */
-.form-group {
-  background: white;
-  padding: 20px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  max-width: 500px;
-}
-
-.form-group label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
-  font-style: italic;
-}
-
-.form-group input {
-  width: calc(100% - 12px);
-  padding: 8px;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-.form-group .button-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.form-group .button-row button {
-  width: auto;
-  padding: 8px 16px;
-}
-
-/* IPC Table Action Buttons */
-.ipc-action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
-.ipc-action-buttons button {
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 2px 6px;
   border-radius: 4px;
   cursor: pointer;
-  border: none;
 }
-
-.ipc-action-buttons .edit-btn {
-  background-color: #f39c12;
-  color: white;
-}
-
-.ipc-action-buttons .edit-btn:hover {
-  background-color: #e67e22;
-}
-
-.ipc-action-buttons .delete-btn {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.ipc-action-buttons .delete-btn:hover {
-  background-color: #c0392b;
+.view-active-ipc-table button.toggle-ipc:hover {
+  background-color: #002244;
 }
 
 
-
-/* Final UI polish for IPC form layout */
-#ipcSection h2 {
-  margin-bottom: 20px;
+/* Make +/- toggles visible and dark */
+.mini-toggle{
+  background:#0b2768; /* dark blue */
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:6px;
+  padding:2px 8px;
+  font-weight:700;
+  line-height:1.1;
+  cursor:pointer;
+}
+.mini-toggle:hover,
+.mini-toggle:focus{
+  filter:brightness(1.1);
+  outline:2px solid rgba(255,255,255,0.15);
+  outline-offset:2px;
 }
 
-#poInput, #site, #idNo, #vendor, #value {
-  margin-bottom: 10px;
-  max-width: 300px;
-}
 
-#poDetails input,
-#ipcSection input {
+
+/* Borders for View Active IPC tables, including PO results */
+#activePOTable, #activePOTable table, #activePOTable th, #activePOTable td,
+[id^="entries-body-"] table, [id^="entries-body-"] th, [id^="entries-body-"] td,
+[id^="details-"] table, [id^="details-"] th, [id^="details-"] td {
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-collapse: collapse;
+}
+#activePOTable th, #activePOTable td,
+[id^="entries-body-"] th, [id^="entries-body-"] td,
+[id^="details-"] th, [id^="details-"] td {
+  padding: 6px 8px;
 }
 
-#poDetails button,
-#ipcSection button {
-  width: auto;
-  padding: 8px 16px;
-  margin-right: 10px;
-}
-
-#poDetails {
-  margin-top: 15px;
-}
-
-#ipcSection .form-group {
-  background: #fff;
-  border-radius: 8px;
-  padding: 25px;
-  max-width: 450px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-#ipcSection .form-group label {
-  font-weight: 600;
-  font-style: italic;
-  display: block;
-  margin-bottom: 5px;
-}
-
-#ipcSection .form-group input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-}
-
-#ipcSection .button-row {
-  display: flex;
-  justify-content: flex-start;
-}
-
-
-.ipc-flex-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  align-items: flex-start;
-}
-
-.ipc-left-column {
-  flex: 1;
-  min-width: 300px;
-  max-width: 400px;
-}
-
-.ipc-right-column {
-  flex: 2;
-  min-width: 400px;
-}
-
-
-
-/* Align top content in flex layout */
-.ipc-flex-container {
-  align-items: flex-start;
-}
-
-/* Align titles at the same level */
-.ipc-left-column h2,
-.ipc-right-column h3 {
-  margin-top: 0;
-}
-
-.ipc-right-column {
-  padding-top: 32px; /* aligns h3 with h2 visually */
-}

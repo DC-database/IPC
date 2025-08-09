@@ -8,15 +8,27 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="sidebar">
+  <!-- overlay for mobile sidebar -->
+  <div id="overlay" onclick="closeSidebar()" aria-hidden="true"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <button class="close-sidebar" onclick="closeSidebar()" aria-label="Close menu">✕</button>
     <h2>📋 IPC Portal</h2>
     <ul>
-      <li id="authButton" onclick="showSection('loginSection')">🔑 Login</li>
-      <li id="ipcMenu" style="display:none;" onclick="showSection('ipcSection')">📝 IPC Management</li>
-      <li id="settingsMenu" style="display:none;" onclick="showSection('settingsSection')">⚙️ Settings</li>
+      <li id="authButton" onclick="navigateFromSidebar('loginSection')">🔑 Login</li>
+      <li id="ipcMenu" style="display:none;" onclick="navigateFromSidebar('ipcSection')">📝 IPC Management</li>
+      <li id="activeIPCMenu" style="display:none;" onclick="navigateFromSidebar('activeIPCSection')">📊 View Active IPC</li>
+      <li id="settingsMenu" style="display:none;" onclick="navigateFromSidebar('settingsSection')">⚙️ Settings</li>
       <li id="logoutButton" style="display:none;" onclick="logout()">🚪 Logout</li>
     </ul>
     <div id="userDisplay" style="display:none;"></div>
+  </div>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <button id="hamburgerBtn" class="hamburger" onclick="toggleSidebar()" aria-label="Open menu">☰</button>
+    <div class="topbar-title">IPC System</div>
   </div>
 
   <div class="main">
@@ -34,82 +46,129 @@
       </div>
     </section>
 
+    <!-- Existing IPC Entry page -->
     <section id="ipcSection" style="display:none;">
-  <h2>IPC Entry</h2>
-  <div class="ipc-flex-container">
-    <div class="ipc-left-column">
-      <input type="text" id="poInput" placeholder="Enter PO Number" />
-      <button onclick="fetchPO()">Fetch PO</button>
-      <div id="poDetails" style="display:none;">
-        <div class="form-group" id="poInfoCard" style="display:none;">
-          <label for="site"><strong>Site</strong></label>
-          <input type="text" id="site" placeholder="Site" readonly />
+      <h2>IPC Entry</h2>
+      <div class="ipc-flex-container">
+        <!-- LEFT -->
+        <div class="ipc-left-column">
+          <input type="text" id="poInput" placeholder="Enter PO Number" / class="po-input">
+          <button onclick="fetchPO()">Fetch PO</button>
 
-          <label for="idNo"><strong>ID No</strong></label>
-          <input type="text" id="idNo" placeholder="ID No" readonly />
+          <!-- PO Information (default open with +/- toggle) -->
+          <div class="poinfo-card">
+            <div class="toggle-row" onclick="togglePOInfo()" role="button" aria-expanded="true" aria-controls="poInfoWrap">
+              <span class="toggle-label">PO Information</span>
+              <span id="poInfoIcon" class="toggle-icon">−</span>
+            </div>
 
-          <label for="vendor"><strong>Vendor</strong></label>
-          <input type="text" id="vendor" placeholder="Vendor" readonly />
+            <div id="poInfoWrap" class="toggle-content">
+              <div id="poDetails" style="display:none;">
+                <div class="form-group" id="poInfoCard" style="display:none;">
+                  <label><strong>Site</strong></label>
+                  <input type="text" id="site" readonly />
+                  <label><strong>ID No</strong></label>
+                  <input type="text" id="idNo" readonly />
+                  <label><strong>Vendor</strong></label>
+                  <input type="text" id="vendor" readonly />
+                  <label><strong>Value</strong></label>
+                  <input type="text" id="value" readonly />
+                </div>
+              </div>
 
-          <label for="value"><strong>Value</strong></label>
-          <input type="text" id="value" placeholder="Value" readonly />
-
-          <div class="button-row">
-            <button onclick="addPO()">Add PO</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="poInfoDisplay" class="form-group" style="display: none;">
-        <h3>PO Information</h3>
-        <p><strong>Site:</strong> <span id="infoSite"></span></p>
-        <p><strong>ID No:</strong> <span id="infoIdNo"></span></p>
-        <p><strong>Vendor:</strong> <span id="infoVendor"></span></p>
-        <p><strong>Value:</strong> <span id="infoValue"></span></p>
-      </div>
-    </div>
-
-    <div class="ipc-right-column">
-      <div id="ipcEntrySection" style="display:none;">
-        <h3>Add IPC Entry</h3>
-        <div class="form-group">
-          <label for="certifiedAmount">Certified Amount</label>
-          <input type="number" id="certifiedAmount" placeholder="Enter certified amount" title="Certified Amount" />
-
-          <label for="previousPayment">Previous Payment</label>
-          <input type="text" id="previousPayment" placeholder="Previous payment" title="Previous Payment" readonly />
-
-          <label for="retention">Retention</label>
-          <input type="number" id="retention" placeholder="Enter retention" title="Retention" />
-
-          <label for="amountToPaid">Amount To Paid</label>
-          <input type="text" id="amountToPaid" placeholder="Auto-calculated" title="Amount To Paid" readonly />
-
-          <div class="button-row">
-            <button onclick="addIPC()">Add IPC</button>
-            <button onclick="clearIPCFields()">Clear</button>
+              <div id="poInfoDisplay" class="form-group" style="display:none;">
+                <p><strong>Site:</strong> <span id="infoSite"></span></p>
+                <p><strong>ID No:</strong> <span id="infoIdNo"></span></p>
+                <p><strong>Vendor:</strong> <span id="infoVendor"></span></p>
+                <p><strong>Value:</strong> <span id="infoValue"></span></p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <h3>IPC Entries</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>IPC No</th>
-              <th>Certified Amount</th>
-              <th>Previous Payment</th>
-              <th>Retention</th>
-              <th>Amount To Paid</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ipcTableBody"></tbody>
-        </table>
-      </div>
-    </div>
+        <!-- RIGHT -->
+        <div class="ipc-right-column" style="display:none;">
+          <h3>Add IPC Entry</h3>
+          <div id="ipcEntrySection" style="display:none;">
+            <div class="form-group">
+              <label for="certifiedAmount">Certified Amount</label>
+              <input type="number" id="certifiedAmount" placeholder="Enter certified amount" title="Certified Amount" />
+
+              <label for="previousPayment">Previous Payment</label>
+              <input type="text" id="previousPayment" placeholder="Previous payment" title="Previous Payment" readonly />
+
+              <label for="retention">Retention</label>
+              <input type="number" id="retention" placeholder="Enter retention" title="Retention" />
+              
+<div class="retention-calc">
+  <div class="retention-row">
+    <label class="mini" for="retentionPercent">Ret.%</label>
+    <input type="number" id="retentionPercent" min="0" step="0.01" placeholder="%" title="Retention percent" />
   </div>
-</section>
+  <div class="retention-row">
+    <label class="mini" for="retentionBase">Base</label>
+    <input type="number" id="retentionBase" min="0" step="0.01" placeholder="amount" title="Retention base amount" />
+  </div>
+</div>
 
+
+
+              <label for="amountToPaid">Amount To Paid</label>
+              <input type="text" id="amountToPaid" placeholder="Auto-calculated" title="Amount To Paid" readonly />
+
+              <div class="button-row">
+                <button onclick="addIPC()">Add IPC</button>
+                <button onclick="clearIPCFields()">Clear</button>
+              </div>
+            </div>
+
+            <h3 class="ipc-entries-title">IPC Entries</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>IPC No</th>
+                  <th>Certified Amount</th>
+                  <th>Previous Payment</th>
+                  <th>Retention</th>
+                  <th>Amount To Paid</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ipcTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- New: Active IPC page -->
+    <section id="activeIPCSection" style="display:none;">
+      <h2>View Active IPC</h2>
+      <div class="form-group" style="max-width:800px;">
+        <label for="activePOSearch" style="font-weight:600;">Search PO / Site / ID / Vendor</label>
+        <input type="text" id="activePOSearch" placeholder="Type to filter…" oninput="filterActivePOs()" />
+      </div>
+
+      <div class="form-group" style="max-width:100%;">
+        <div class="table-responsive">
+          <table class="active-po-table">
+            <thead>
+              <tr>
+                <th style="width:50px;"></th>
+                <th>PO</th>
+                <th>Site</th>
+                <th>ID No</th>
+                <th>Vendor</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody id="activePOTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings page unchanged -->
     <section id="settingsSection" style="display:none;">
       <h2 id="settingsTitle">Settings</h2>
       <div id="userInfoSection" style="display:none;">

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,19 +31,18 @@
   </div>
 
   <div class="main">
-    <section id="loginSection">
-      <div id="loginBox">
-        <h2>User Login</h2>
-        <input type="email" id="loginEmail" placeholder="Email" />
-        <input type="password" id="loginPassword" placeholder="Password" />
-        <button onclick="loginUser()">Login</button>
-      </div>
-
-      <div id="welcomeBox" style="display:none;">
+   <section id="loginSection">
+  <div id="loginBox">
+    <h2>User Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email"
+      onkeypress="if(event.key === 'Enter'){ loginUser(); }" />
+    <input type="password" id="loginPassword" placeholder="Password"
+      onkeypress="if(event.key === 'Enter'){ loginUser(); }" />
+    <button onclick="loginUser()">Login</button>
+  <div id="welcomeBox" style="display:none;">
         <h2 id="welcomeMsg"></h2>
-        <button onclick="showSection('ipcSection')">➕ Click here to add IPC</button>
-      </div>
-    </section>
+        <button id="startIPCBtn" class="welcome-add-ipc" onclick="startIPC()">➕ Click here to add IPC</button>
+      </div></div></section>
 
     <!-- Existing IPC Entry page -->
     <section id="ipcSection" style="display:none;">
@@ -114,7 +112,7 @@
 
 
               <label for="amountToPaid">Amount To Paid</label>
-              <input type="text" id="amountToPaid" placeholder="Auto-calculated" title="Amount To Paid" readonly />
+              <input data-manual="1" type="text" id="amountToPaid" placeholder="QAR 0.00" title="Amount To Paid" />
 
               <div class="button-row">
                 <button onclick="addIPC()">Add IPC</button>
@@ -131,7 +129,7 @@
                   <th>Previous Payment</th>
                   <th>Retention</th>
                   <th>Amount To Paid</th>
-                  <th>Actions</th>
+                  <th>Date</th><th>Remarks</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody id="ipcTableBody"></tbody>
@@ -195,7 +193,7 @@
       <div id="userManagementSection" style="display:none;">
         <div class="form-group">
           <h3>User List</h3>
-          <table class="users-table">
+          <table class="users-table styled-table">
             <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
             <tbody id="usersTableBody"></tbody>
           </table>

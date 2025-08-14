@@ -1,4 +1,3 @@
-
 const firebaseConfig = {
   apiKey: "AIzaSyC7cfmocz3oPyERDIiJj5XIDeA3wc6rQZI",
   authDomain: "progress-po.firebaseapp.com",
@@ -25,10 +24,20 @@ function showAddIPCLabel() {
   poInputEl.insertAdjacentElement('afterend', label);
 }
 
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
+
+// === QAR helpers (minimal) ===
+function parseQAR(value) {
+  const n = parseFloat(String(value ?? '').toString().replace(/[^\d.]/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+function formatQAR(n) {
+  const num = typeof n === 'string' ? parseFloat(n) : n;
+  return 'QAR ' + Number(num || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+// === end helpers ===
 
 const ADMIN_EMAIL = 'dc@iba.com.qa';
 let currentUserData = null;
@@ -137,7 +146,7 @@ function showAdminUI(userData) {
   document.getElementById('authButton').style.display = 'none';
   document.getElementById('userDisplay').textContent = `👤 ${userData.name} (Admin)`;
   document.getElementById('userDisplay').style.display = 'block';
-  showSection('welcomeBox');
+  startIPC();
 }
 
 function showUserUI(userData) {
@@ -152,7 +161,7 @@ function showUserUI(userData) {
   document.getElementById('authButton').style.display = 'none';
   document.getElementById('userDisplay').textContent = `👤 ${userData.name}`;
   document.getElementById('userDisplay').style.display = 'block';
-  showSection('welcomeBox');
+  startIPC();
 }
 
 function updateSettingsUI() {
@@ -178,6 +187,7 @@ function updateSettingsUI() {
 function loadUsersList() {
   const tbody = document.getElementById('usersTableBody');
   tbody.innerHTML = '';
+    
 
   db.ref('users').once('value', snapshot => {
     snapshot.forEach(child => {
@@ -319,7 +329,7 @@ function logout() {
   location.reload();
 }
 
-/* ===== IPC Management (existing) ===== */
+/* ===== IPC Management ===== */
 let ensurePOInfoOpenRan = false;
 function ensurePOInfoOpen() {
   const wrap = document.getElementById('poInfoWrap');
@@ -331,6 +341,21 @@ function ensurePOInfoOpen() {
   wrap.style.opacity = '1';
   if (icon) icon.textContent = '−';
   if (row) row.setAttribute('aria-expanded', 'true');
+}
+
+// Toggle for PO info card
+function togglePOInfo() {
+  const wrap = document.getElementById('poInfoWrap');
+  const icon = document.getElementById('poInfoIcon');
+  if (!wrap) return;
+  const isOpen = wrap.style.display !== 'none';
+  if (isOpen) {
+    wrap.style.display = 'none';
+    if (icon) icon.textContent = '+';
+  } else {
+    wrap.style.display = 'block';
+    if (icon) icon.textContent = '−';
+  }
 }
 
 async function fetchPO() {
@@ -351,9 +376,9 @@ async function fetchPO() {
       document.getElementById("vendor").value = firstEntry.Vendor || "";
       document.getElementById("value").value = firstEntry.Value || "";
       document.getElementById("ipcEntrySection").style.display = "block";
-        wireRetentionCalcListeners();
-        computeRetentionFromInputs();
-        showIPCRightColumn();
+      wireRetentionCalcListeners();
+      computeRetentionFromInputs();
+      showIPCRightColumn();
       document.getElementById("infoSite").textContent = document.getElementById("site").value;
       document.getElementById("infoIdNo").textContent = document.getElementById("idNo").value;
       document.getElementById("infoVendor").textContent = document.getElementById("vendor").value;
@@ -422,7 +447,7 @@ async function addIPC() {
       CertifiedAmount: document.getElementById('certifiedAmount').value || '0',
       PreviousPayment: document.getElementById('previousPayment').value || '0',
       Retention: document.getElementById('retention').value || '0',
-      AmountToPaid: document.getElementById('amountToPaid').value || '0'
+      AmountToPaid: (parseQAR(document.getElementById('amountToPaid')?.value)||0).toFixed(2)
     };
 
     await ipcRef.child(ipcNo).set(entry);
@@ -441,31 +466,54 @@ async function loadIPCEntries(po) {
   try {
     const tbody = document.getElementById('ipcTableBody');
     tbody.innerHTML = '';
+    let __mgrTotal = 0;
     if (!po) po = currentPO;
     const snapshot = await db.ref('IPC/' + po + '/entries').once('value');
     if (!snapshot.exists()) {
-      tbody.innerHTML = '<tr><td colspan="6">No IPC entries found for this PO</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8">No IPC entries found for this PO</td></tr>';
       return;
     }
 
     snapshot.forEach(child => {
       const ipcNo = child.key;
       const data = child.val();
+      __mgrTotal += parseQAR(data && data.AmountToPaid != null ? data.AmountToPaid : 0);
+      const remarks = (data.Remarks || '').toLowerCase();
+
+      // Ready implies Under
+      const isUnderDone = remarks === 'under process' || remarks === 'ipc completed';
+      const isReadyDone = remarks === 'ipc completed';
+
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${ipcNo}</td>
         <td>${data.CertifiedAmount || '0'}</td>
         <td>${data.PreviousPayment || '0'}</td>
         <td>${data.Retention || '0'}</td>
-        <td>${data.AmountToPaid || '0'}</td>
+        <td>${formatQAR(data.AmountToPaid) || 'QAR 0.00'}</td>
+        <td>${data.Date || ""}</td>
+        <td>${data.Remarks || ""}</td>
         <td>
           <div class="ipc-action-buttons">
-            <button class="delete-btn" onclick="deleteIPC('${ipcNo}')">Delete</button>
+  <button class="delete-btn" onclick="deleteIPC('${ipcNo}')">Delete</button>
+  <button
+              class="under-btn ${isUnderDone ? 'done' : ''}"
+              onclick="markUnderProcess('${ipcNo}')"
+              ${isUnderDone ? 'disabled' : ''}>
+              Under Process
+            </button>
+  <button
+              class="ready-btn ${isReadyDone ? 'done' : ''}"
+              onclick="markIPCReady('${ipcNo}')"
+              ${(!isUnderDone || isReadyDone) ? 'disabled' : ''}>
+              IPC Ready
+            </button>
           </div>
         </td>
       `;
       tbody.appendChild(row);
     });
+
   } catch (err) {
     handleError(err, "loadIPCEntries");
   }
@@ -473,15 +521,29 @@ async function loadIPCEntries(po) {
 
 async function deleteIPC(ipcNo) {
   if (!currentPO || !ipcNo) return;
-  if (confirm('Are you sure you want to delete ' + ipcNo + '?')) {
-    try {
-      await db.ref('IPC/' + currentPO + '/entries/' + ipcNo).remove();
-      loadIPCEntries(currentPO);
-    } catch (err) {
-      handleError(err, "deleteIPC");
+  try {
+    // Only allow deleting the most recent IPC for the current PO
+    const snap = await db.ref('IPC/' + currentPO + '/entries').once('value');
+    if (!snap.exists()) return;
+    const entries = snap.val() || {};
+    const keys = Object.keys(entries).sort((a,b) => {
+      const an = parseInt(String(a).replace('IPC ', '')) || 0;
+      const bn = parseInt(String(b).replace('IPC ', '')) || 0;
+      return an - bn;
+    });
+    const lastKey = keys[keys.length - 1];
+    if (ipcNo !== lastKey) {
+      alert('You can only delete the most recent IPC (' + lastKey + '). Delete newer entries first.');
+      return;
     }
+    if (!confirm('Are you sure you want to delete ' + ipcNo + '?')) return;
+    await db.ref('IPC/' + currentPO + '/entries/' + ipcNo).remove();
+    loadIPCEntries(currentPO);
+  } catch (err) {
+    handleError(err, 'deleteIPC');
   }
 }
+
 
 // Auto-fill Previous Payment
 document.addEventListener('DOMContentLoaded', () => {
@@ -514,6 +576,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function calculateAmountToPaid() {
+  try {
+    var atp = document.getElementById('amountToPaid');
+    if (atp && atp.dataset && atp.dataset.manual === '1') return; // manual mode: don't overwrite
+  } catch(e) {}
   const certified = parseFloat(document.getElementById('certifiedAmount').value) || 0;
   const retention = parseFloat(document.getElementById('retention').value) || 0;
   const toPaid = certified - retention;
@@ -599,7 +665,7 @@ function renderActivePOs(list) {
       <td>${item.Site}</td>
       <td>${item.IDNo}</td>
       <td>${item.Vendor}</td>
-      <td>${item.Value}</td>
+      <td>${item.Value ? formatQAR(item.Value) : 'QAR 0.00'}</td>
     `;
     tbody.appendChild(tr);
 
@@ -613,18 +679,17 @@ function renderActivePOs(list) {
         <div class="entries-wrap">
           <div class="entries-title">IPC Entries for PO ${item.po}</div>
           <div class="entries-table-container">
-            <table class="inner-table">
+            <table class="active-ipc-table" class="inner-table">
               <thead>
                 <tr>
                   <th>IPC No</th>
-                  <th>Certified Amount</th>
-                  <th>Previous Payment</th>
-                  <th>Retention</th>
                   <th>Amount To Paid</th>
+                  <th>Date</th>
+                  <th>Remarks</th>
                 </tr>
               </thead>
               <tbody id="entries-body-${item.po}">
-                <tr><td colspan="5" class="muted">Click + to load entries…</td></tr>
+                <tr><td colspan="4" class="muted">Click + to load entries…</td></tr>
               </tbody>
             </table>
           </div>
@@ -649,12 +714,12 @@ async function togglePOEntries(po, btn) {
   btn.textContent = '−';
 
   const body = document.getElementById(`entries-body-${po}`);
-  body.innerHTML = '<tr><td colspan="5" class="muted">Loading…</td></tr>';
+  body.innerHTML = '<tr><td colspan="4" class="muted">Loading…</td></tr>';
 
   try {
     const snap = await db.ref(`IPC/${po}/entries`).once('value');
     if (!snap.exists()) {
-      body.innerHTML = '<tr><td colspan="5" class="muted">No entries for this PO</td></tr>';
+      body.innerHTML = '<tr><td colspan="4" class="muted">No entries for this PO</td></tr>';
       return;
     }
     const entries = snap.val();
@@ -663,18 +728,33 @@ async function togglePOEntries(po, btn) {
       return an - bn;
     });
     body.innerHTML = '';
+    let __totalAmountToPaid = 0;
     keys.forEach(k => {
       const e = entries[k];
+      __totalAmountToPaid += parseQAR(e && e.AmountToPaid != null ? e.AmountToPaid : 0);
+      const amount = (e && e.AmountToPaid != null) ? formatQAR(e.AmountToPaid) : 'QAR 0.00';
+      const date   = (e && e.Date) ? e.Date : '—';
+      const remarks= (e && e.Remarks) ? e.Remarks : '—';
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${k}</td>
-        <td>${e.CertifiedAmount || '0'}</td>
-        <td>${e.PreviousPayment || '0'}</td>
-        <td>${e.Retention || '0'}</td>
-        <td>${e.AmountToPaid || '0'}</td>
+        <td>${amount}</td>
+        <td>${date}</td>
+        <td>${remarks}</td>
       `;
       body.appendChild(tr);
     });
+
+    // Append TOTAL row for Amount To Paid
+    const totalRow = document.createElement('tr');
+    totalRow.className = 'entries-total-row';
+    totalRow.innerHTML = `
+      <td style="font-weight:600">TOTAL</td>
+      <td style="font-weight:700">${formatQAR(__totalAmountToPaid)}</td>
+      <td></td>
+      <td></td>
+    `;
+    body.appendChild(totalRow);
   } catch (err) {
     handleError(err, "togglePOEntries");
   }
@@ -701,8 +781,7 @@ function hideIPCRightColumn() {
   if (rc) rc.style.display = 'none';
 }
 
-
-// --- Retention calculator ---
+// --- Retention calculator (wired if needed) ---
 function computeRetentionFromInputs() {
   const p = parseFloat(document.getElementById('retentionPercent')?.value);
   const baseStr = document.getElementById('retentionBase')?.value;
@@ -733,3 +812,86 @@ function wireRetentionCalcListeners() {
     }
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const atp = document.getElementById('amountToPaid');
+  if (atp) {
+    atp.addEventListener('focus', () => {
+      const n = parseQAR(atp.value);
+      atp.value = n ? String(n) : '';
+    });
+    atp.addEventListener('blur', () => {
+      const n = parseQAR(atp.value);
+      atp.value = n ? formatQAR(n) : '';
+    });
+  }
+});
+
+async function markUnderProcess(ipcNo) {
+  if (!currentPO || !ipcNo) return;
+
+  const today = new Date();
+  const dateStr = today.toISOString().split('T')[0]; // yyyy-mm-dd
+
+  try {
+    await db.ref(`IPC/${currentPO}/entries/${ipcNo}`).update({
+      Date: dateStr,
+      Remarks: "Under Process"
+    });
+
+    // Instant visual feedback
+    const btn = document.querySelector(`button[onclick="markUnderProcess('${ipcNo}')"]`);
+    if (btn) { btn.classList.add('done'); btn.disabled = true; }
+
+    loadIPCEntries(currentPO);
+  } catch (err) {
+    handleError(err, "markUnderProcess");
+  }
+}
+
+async function markIPCReady(ipcNo) {
+  if (!currentPO || !ipcNo) return;
+
+  const today = new Date();
+  const dateStr = today.toISOString().split('T')[0]; // yyyy-mm-dd
+
+  try {
+    // Require 'Under Process' before allowing 'IPC Completed'
+    const snap = await db.ref(`IPC/${currentPO}/entries/${ipcNo}`).once('value');
+    if (!snap.exists()) return;
+    const val = snap.val() || {};
+    const remarks = String(val.Remarks || '').toLowerCase();
+    if (remarks !== 'under process') {
+      alert('Please press "Under Process" first.');
+      return;
+    }
+
+    await db.ref(`IPC/${currentPO}/entries/${ipcNo}`).update({
+      Date: dateStr,
+      Remarks: 'IPC Completed'
+    });
+
+    const btn = document.querySelector(`button[onclick="markIPCReady('${ipcNo}')"]`);
+    if (btn) { btn.classList.add('done'); btn.disabled = true; }
+    loadIPCEntries(currentPO);
+  } catch (err) {
+    handleError(err, 'markIPCReady');
+  }
+}
+
+
+
+function startIPC() {
+  // Hide welcome + login and go straight to IPC Entry
+  var welcome = document.getElementById('welcomeBox');
+  if (welcome) welcome.style.display = 'none';
+  var loginSec = document.getElementById('loginSection');
+  if (loginSec) loginSec.style.display = 'none';
+  showSection('ipcSection');
+  // Focus PO input so user can fetch immediately
+  setTimeout(() => {
+    const po = document.getElementById('poInput');
+    if (po) { po.focus(); }
+  }, 0);
+}
+

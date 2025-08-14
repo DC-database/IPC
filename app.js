@@ -466,6 +466,7 @@ async function loadIPCEntries(po) {
   try {
     const tbody = document.getElementById('ipcTableBody');
     tbody.innerHTML = '';
+    let __mgrTotalATP = 0;
     let __mgrTotal = 0;
     if (!po) po = currentPO;
     const snapshot = await db.ref('IPC/' + po + '/entries').once('value');
@@ -477,6 +478,7 @@ async function loadIPCEntries(po) {
     snapshot.forEach(child => {
       const ipcNo = child.key;
       const data = child.val();
+      __mgrTotalATP += parseQAR(data && data.AmountToPaid != null ? data.AmountToPaid : 0);
       __mgrTotal += parseQAR(data && data.AmountToPaid != null ? data.AmountToPaid : 0);
       const remarks = (data.Remarks || '').toLowerCase();
 
@@ -514,7 +516,23 @@ async function loadIPCEntries(po) {
       tbody.appendChild(row);
     });
 
-  } catch (err) {
+  
+
+    // TOTAL row for IPC Management (Amount To Paid)
+    const totalTr = document.createElement('tr');
+    totalTr.className = 'entries-total-row';
+    totalTr.innerHTML = `
+      <td style="font-weight:600">TOTAL</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td style="font-weight:700">${formatQAR(__mgrTotalATP)}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    `;
+tbody.appendChild(totalTr);
+} catch (err) {
     handleError(err, "loadIPCEntries");
   }
 }
